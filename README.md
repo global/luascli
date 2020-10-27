@@ -20,7 +20,9 @@ where
 
 ## How to install
 
+```
 pip install luascli
+```
 
 ## How to use
 
