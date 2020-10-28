@@ -1,6 +1,10 @@
-name: test and build luascli app on push
+name: build and test luascli
 
-on: [push]
+on:
+  push:
+    branches:
+      'feature/*'
+
 jobs:
   build-luascli:
     runs-on: ubuntu-latest
