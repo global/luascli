@@ -2,7 +2,7 @@
 
 init:
 	pip install pipenv --upgrade
-	PIPENV_VERBOSITY=-1 pipenv install --dev
+	PIPENV_VERBOSITY=-1 pipenv install --dev --pre
 
 check:
 	PIPENV_VERBOSITY=-1 pipenv run flake8 --ignore=E501,W503 luascli
