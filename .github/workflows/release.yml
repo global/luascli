@@ -1,0 +1,27 @@
+name: release
+
+on:
+  push:
+    tags:     
+      - '**'
+      - '!*-rc*'
+
+jobs:
+  release-luascli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+
+      - name: Build luascli
+        run: >-
+          make build
+      
+      - name: Publish distribution 📦 to PyPI
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          password: ${{ secrets.PYPI_PASSWORD }}

@@ -81,3 +81,16 @@ CI/CD
 
 Documentation
 - Markdown
+
+## Pipeline
+
+We have multiple workflows defined in github actions (.github/workflows). 
+
+- build: on every push to feature/* branches, it will trigger the build pipeline that run tests and build the app
+- release-rc: on every tags/*-rc* it will publish to pypi-test
+- release: on every tags/** excluding tags/*-rc* it will publish to pypi
+
+### Conventions
+
+- Branching: every branch should start with *feature/* prefix to trigger the build pipeline
+- Releasing and tagging: When ready to release, create a release in github with the version format x.y.z (semantic versioning). If it is a release candidate, add -rcNN to the end of the name.

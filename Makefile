@@ -2,28 +2,28 @@
 
 init:
 	pip install pipenv --upgrade
-	PIPENV_VERBOSITY=-1 pipenv install --dev
+	PIPENV_VERBOSITY=-1 pipenv install --dev --pre
 
 check:
 	PIPENV_VERBOSITY=-1 pipenv run flake8 --ignore=E501,W503 luascli
-	bandit -r luascli
-	black .
+	PIPENV_VERBOSITY=-1 pipenv run bandit -r luascli
+	PIPENV_VERBOSITY=-1 pipenv run black . --check
 
 test:
-	coverage run --source=luascli -m pytest tests
-	coverage report --fail-under=10
+	PIPENV_VERBOSITY=-1 pipenv run coverage run --source=luascli -m pytest tests
+	PIPENV_VERBOSITY=-1 pipenv run coverage report --fail-under=10
 
 build: init check clean test
-	python setup.py sdist bdist_wheel
+	PIPENV_VERBOSITY=-1 pipenv run python setup.py sdist bdist_wheel
 
 publish-test: build
-	python -m twine check dist/*
-	python -m twine upload --repository testpypi dist/*
+	PIPENV_VERBOSITY=-1 pipenv run python -m twine check dist/*
+	PIPENV_VERBOSITY=-1 pipenv run python -m twine upload --repository testpypi dist/*
 	make clean
 
 publish: build
-	python -m twine check dist/*
-	python -m twine upload dist/*
+	PIPENV_VERBOSITY=-1 pipenv run python -m twine check dist/*
+	PIPENV_VERBOSITY=-1 pipenv run python -m twine upload dist/*
 	make clean
 
 local-install: build
@@ -39,8 +39,8 @@ help:
 	@echo " check	 		check for flake8 syntax issues"
 	@echo " test			run tests"
 	@echo " build   		build your code and generate binaries to be published"
-	@echo " publish-test		submit your code to pypi-test repository"
-	@echo " publish 		submit your code to pypi repository"
+	@echo " publish-test		submit your code to pypi-test repository (requires .pypirc)"
+	@echo " publish 		submit your code to pypi repository (requires .pypirc)"
 	@echo " local-install 		Install luascli in editable mode (i.e. setuptools 'develop mode')"
 	@echo " clean			cleanup your build"
 	@echo " help			display this information"

@@ -13,6 +13,7 @@ coverage = "*"
 flake8 = "*"
 pytest = "*"
 bandit = "*"
+black = "*"
 
 [packages]
 requests = "*"
@@ -21,3 +22,6 @@ xmltodict = "*"
 
 [requires]
 python_version = "3.8"
+
+[pipenv]
+allow_prereleases = true
