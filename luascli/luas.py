@@ -14,6 +14,7 @@ def _xml_to_dict(xmldata):
         dictionary with all xml elements
     """
     import xmltodict
+
     doc = xmltodict.parse(xmldata)
     return doc
 
@@ -28,9 +29,12 @@ def get_status(stop):
         Operational status information
     """
     ops = requests.get(
-        'https://luasforecasts.rpa.ie/xml/get.ashx?action=forecast&stop=' + stop + '&encrypt=false')
+        "https://luasforecasts.rpa.ie/xml/get.ashx?action=forecast&stop="
+        + stop
+        + "&encrypt=false"
+    )
     doc = _xml_to_dict(ops.text)
-    return doc['stopInfo']['message']
+    return doc["stopInfo"]["message"]
 
 
 def get_stops(line_name):
@@ -44,15 +48,24 @@ def get_stops(line_name):
         abbreviated name, full name, park and ride support, cycle and ride support, location (lat/long).
     """
     res = requests.get(
-        'https://luasforecasts.rpa.ie/xml/get.ashx?action=stops&encrypt=false')
+        "https://luasforecasts.rpa.ie/xml/get.ashx?action=stops&encrypt=false"
+    )
     output = []
     stops = _xml_to_dict(res.text)
-    lines = stops['stops']['line']
+    lines = stops["stops"]["line"]
     for line in lines:
-        if (line['@name'] == line_name):
-            for stop in line['stop']:
-                output.append({'abrev': stop['@abrev'], 'text': stop['@pronunciation'], 'park_ride': stop['@isParkRide'], 'cycle_ride': stop['@isCycleRide'],
-                               'lat': stop['@lat'], 'long': stop['@long']})
+        if line["@name"] == line_name:
+            for stop in line["stop"]:
+                output.append(
+                    {
+                        "abrev": stop["@abrev"],
+                        "text": stop["@pronunciation"],
+                        "park_ride": stop["@isParkRide"],
+                        "cycle_ride": stop["@isCycleRide"],
+                        "lat": stop["@lat"],
+                        "long": stop["@long"],
+                    }
+                )
     return output
 
 
@@ -68,7 +81,7 @@ def get_stop_detail(stop, line_name):
     """
     all_stops = get_stops(line_name)
     for s in all_stops:
-        if s['abrev'].lower() == stop.lower():
+        if s["abrev"].lower() == stop.lower():
             return s
 
     return None
@@ -84,10 +97,10 @@ def print_stops(stops):
         None
     """
     for stop in stops:
-        abrev = stop['abrev']
-        text = stop['text']
-        park = 'Park and Ride' if stop['park_ride'] == '1' else 'No park'
-        cycle = 'Cycle and Ride' if stop['cycle_ride'] == '1' else 'No cycle'
+        abrev = stop["abrev"]
+        text = stop["text"]
+        park = "Park and Ride" if stop["park_ride"] == "1" else "No park"
+        cycle = "Cycle and Ride" if stop["cycle_ride"] == "1" else "No cycle"
         click.echo(f"{abrev:<6}{text:<20}{park:^20}{cycle:^30}")
 
     return None
