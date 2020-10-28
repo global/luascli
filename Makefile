@@ -7,7 +7,7 @@ init:
 check:
 	PIPENV_VERBOSITY=-1 pipenv run flake8 --ignore=E501,W503 luascli
 	bandit -r luascli
-	black .
+	black . --check
 
 test:
 	coverage run --source=luascli -m pytest tests
