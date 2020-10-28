@@ -2,6 +2,7 @@
 
 import click
 from luascli.luas import get_stops, get_stop_detail, get_status, print_stops
+import sys
 
 
 @click.group()
@@ -56,7 +57,7 @@ def map(ctx, stop):
         line_name = "Luas Green Line"
     else:
         click.echo("The line " + ctx.obj["line"] + " doesn't exist")
-        return
+        sys.exit(1)
 
     s = get_stop_detail(stop, line_name)
     if s is not None:
