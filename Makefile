@@ -10,8 +10,8 @@ check:
 	PIPENV_VERBOSITY=-1 pipenv run black . --check
 
 test:
-	PIPENV_VERBOSITY=-1 pipenv run coverage run --source=luascli -m pytest tests
-	PIPENV_VERBOSITY=-1 pipenv run coverage report --fail-under=10
+	PIPENV_VERBOSITY=-1 pipenv run coverage run --source=luascli --omit=luascli/__version__.py -m pytest tests
+	PIPENV_VERBOSITY=-1 pipenv run coverage report --fail-under=100
 
 build: init check clean test
 	PIPENV_VERBOSITY=-1 pipenv run python setup.py sdist bdist_wheel
