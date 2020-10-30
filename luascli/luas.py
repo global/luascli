@@ -2,21 +2,10 @@
 
 import click
 import requests
-
-
-def _xml_to_dict(xmldata):
-    """Converts XML data into python dictionary
-
-    Args:
-        xmldata: xml string
-
-    Returns:
-        dictionary with all xml elements
-    """
-    import xmltodict
-
-    doc = xmltodict.parse(xmldata)
-    return doc
+from luascli.util import xml_to_dict, get_address_by_coordinates
+from luascli.exceptions import LuasStopNotFound, LuasLineNotFound
+from xml.parsers.expat import ExpatError
+from luascli import config
 
 
 def get_status(stop):
@@ -28,13 +17,24 @@ def get_status(stop):
     Returns:
         Operational status information
     """
+
     ops = requests.get(
         "https://luasforecasts.rpa.ie/xml/get.ashx?action=forecast&stop="
         + stop
         + "&encrypt=false"
     )
-    doc = _xml_to_dict(ops.text)
-    return doc["stopInfo"]["message"]
+
+    try:
+        doc = xml_to_dict(ops.text)
+    except ExpatError:
+        raise LuasStopNotFound
+
+    try:
+        stop_status = doc["stopInfo"]["message"]
+    except KeyError:
+        raise LuasStopNotFound
+
+    return stop_status
 
 
 def get_stops(line_name):
@@ -45,16 +45,16 @@ def get_stops(line_name):
 
     Returns:
         A list of LUAS stops of a particular line with their details:
-        abbreviated name, full name, park and ride support, cycle and ride support, location (lat/long).
+        abbreviated name, full name, park and ride support, cycle and ride support, location (lat/lon).
     """
     res = requests.get(
         "https://luasforecasts.rpa.ie/xml/get.ashx?action=stops&encrypt=false"
     )
     output = []
-    stops = _xml_to_dict(res.text)
+    stops = xml_to_dict(res.text)
     lines = stops["stops"]["line"]
     for line in lines:
-        if line["@name"] == line_name:
+        if line["@name"] == config.luas[line_name]["full_name"]:
             for stop in line["stop"]:
                 output.append(
                     {
@@ -63,7 +63,7 @@ def get_stops(line_name):
                         "park_ride": stop["@isParkRide"],
                         "cycle_ride": stop["@isCycleRide"],
                         "lat": stop["@lat"],
-                        "long": stop["@long"],
+                        "lon": stop["@long"],
                     }
                 )
     return output
@@ -84,7 +84,7 @@ def get_stop_detail(stop, line_name):
         if s["abrev"].lower() == stop.lower():
             return s
 
-    return None
+    raise LuasStopNotFound
 
 
 def print_stops(stops):
@@ -104,3 +104,41 @@ def print_stops(stops):
         click.echo(f"{abrev:<6}{text:<20}{park:^20}{cycle:^30}")
 
     return None
+
+
+def get_address(stop):
+    """Get the address of a LUAS stop, according to its lat/lon information
+    Args:
+        stop: stop: LUAS stop abbreviated name
+
+    Returns:
+        The address of a Luas stop, in dict format
+    """
+
+    line_name = find_line_by_stop(stop)
+    stop = get_stop_detail(stop, line_name)
+    address = get_address_by_coordinates(stop["lat"], stop["lon"])
+
+    return address
+
+
+def find_line_by_stop(stop):
+    """Return the abbreviated name (e.g. gree/red) of the Luas Line
+
+    Args:
+        stop: stop: LUAS stop abbreviated name
+        line_name: LUAS line (red/green)
+
+    Returns:
+        The address of a Luas stop, in dict format
+    """
+
+    stops = get_stops
+
+    for line in config.luas.keys():
+        stops = get_stops(line)
+        for s in stops:
+            if s["abrev"].lower() == stop.lower():
+                return line
+
+    raise LuasLineNotFound

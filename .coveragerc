@@ -1,4 +1,7 @@
 [report]
 
+omit =
+    luascli/exceptions.py
+
 exclude_lines =
     if __name__ == .__main__.:

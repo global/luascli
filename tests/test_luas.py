@@ -1,45 +1,20 @@
 from luascli.luas import (
-    _xml_to_dict,
     get_status,
     get_stops,
     get_stop_detail,
     print_stops,
+    find_line_by_stop,
+    get_address,
 )
 import json
 from mock import patch
 from requests.exceptions import Timeout
 import pytest
-
-
-def test_xml_to_dict():
-    """Test if _xml_to_dict returns a valid dictionary with the
-    correct contents.
-    """
-
-    sample_xml = """
-    <stops>
-    <line name="Luas Red Line">
-        <stop pronunciation="The Point">The Point</stop>
-        <stop pronunciation="Spencer Dock">Spencer Dock</stop>
-    </line>
-    </stops>
-    """
-    sample_dict = {
-        "stops": {
-            "line": {
-                "@name": "Luas Red Line",
-                "stop": [
-                    {"#text": "The Point", "@pronunciation": "The Point"},
-                    {"#text": "Spencer Dock", "@pronunciation": "Spencer Dock"},
-                ],
-            }
-        }
-    }
-
-    expected_str = json.dumps(sample_dict, sort_keys=True)
-    actual_str = json.dumps(_xml_to_dict(sample_xml), sort_keys=True)
-
-    assert expected_str == actual_str
+from luascli.exceptions import (
+    LuasLineNotFound,
+    AddressLocationNotFound,
+    LuasStopNotFound,
+)
 
 
 @patch("luascli.luas.requests")
@@ -56,6 +31,10 @@ def test_get_status(mock_requests):
     status = get_status("ran")
     mock_requests.get.assert_called_once()
     assert status == "Green Line services operating normally"
+
+    mock_requests.get.return_value.text = "<error></error>"
+    with pytest.raises(LuasStopNotFound):
+        get_status("somethingelse")
 
 
 @patch("luascli.luas.requests")
@@ -84,7 +63,7 @@ def test_get_stops(mock_requests):
     </stops>
     """
 
-    actual = get_stops("Luas Red Line")
+    actual = get_stops("red")
     expected = [
         {
             "abrev": "TPT",
@@ -92,7 +71,7 @@ def test_get_stops(mock_requests):
             "park_ride": "0",
             "cycle_ride": "0",
             "lat": "53.34835",
-            "long": "-6.22925833333333",
+            "lon": "-6.22925833333333",
         },
         {
             "abrev": "SDK",
@@ -100,7 +79,7 @@ def test_get_stops(mock_requests):
             "park_ride": "0",
             "cycle_ride": "0",
             "lat": "53.3488222222222",
-            "long": "-6.23714722222222",
+            "lon": "-6.23714722222222",
         },
     ]
 
@@ -118,7 +97,7 @@ def test_get_stop_detail(mock_get_stops):
             "park_ride": "0",
             "cycle_ride": "0",
             "lat": "53.34835",
-            "long": "-6.22925833333333",
+            "lon": "-6.22925833333333",
         },
         {
             "abrev": "SDK",
@@ -126,7 +105,7 @@ def test_get_stop_detail(mock_get_stops):
             "park_ride": "0",
             "cycle_ride": "0",
             "lat": "53.3488222222222",
-            "long": "-6.23714722222222",
+            "lon": "-6.23714722222222",
         },
     ]
 
@@ -137,7 +116,7 @@ def test_get_stop_detail(mock_get_stops):
         "park_ride": "0",
         "cycle_ride": "0",
         "lat": "53.34835",
-        "long": "-6.22925833333333",
+        "lon": "-6.22925833333333",
     }
 
     expected_str = json.dumps(expected_dict, sort_keys=True)
@@ -146,9 +125,8 @@ def test_get_stop_detail(mock_get_stops):
     assert expected_str == actual_str
 
     # Testing None case
-    actual_dict = get_stop_detail("FAKE", "Luas Red Line")
-
-    assert actual_dict is None
+    with pytest.raises(LuasStopNotFound):
+        actual_dict = get_stop_detail("FAKE", "Luas Red Line")
 
 
 @patch("luascli.luas.click")
@@ -162,7 +140,7 @@ def test_print_stops(mock_click):
             "park_ride": "0",
             "cycle_ride": "0",
             "lat": "53.34835",
-            "long": "-6.22925833333333",
+            "lon": "-6.22925833333333",
         },
         {
             "abrev": "SDK",
@@ -170,7 +148,7 @@ def test_print_stops(mock_click):
             "park_ride": "0",
             "cycle_ride": "0",
             "lat": "53.3488222222222",
-            "long": "-6.23714722222222",
+            "lon": "-6.23714722222222",
         },
     ]
 
@@ -178,3 +156,20 @@ def test_print_stops(mock_click):
     print_stops(mock_stops)
 
     assert mock_click.echo.call_count == 2
+
+
+def test_get_address():
+    """Test if get_address returns positive results"""
+
+    address = get_address("ran")
+    assert address["postcode"] == "D06 R9X5"
+
+
+def test_find_line_by_stop():
+    """Test if find_line_by_Stop returns can find which Luas line a stop belongs to"""
+
+    line = find_line_by_stop("ran")
+    assert line == "green"
+
+    with pytest.raises(LuasLineNotFound):
+        find_line_by_stop("somethingelse")
