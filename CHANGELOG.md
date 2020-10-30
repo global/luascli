@@ -8,10 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 # [0.5.0] - 2020-10-30
 
-- Complete refactor of cli to simplify code and parameter passing
-- Added better error handling
+# Added
+
 - You can now get the address of a Luas stop using `luas address <stop>`
+- Added better error handling
 - Configuration is now stored in config.py
+
+# Changed
+
+- Complete refactor of cli to simplify code and parameter passing
 
 ## [0.4.0] - 2020-10-29
 
