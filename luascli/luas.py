@@ -37,6 +37,54 @@ def get_status(stop):
     return stop_status
 
 
+def get_timetable(stop):
+    """Get the operational timetable of a particular Luas stop
+
+    Args:
+        stop: LUAS abbreviated stop name
+
+    Returns:
+        List of inbound/outbound timetable of a particular luas stopp
+    """
+
+    timetable = {}
+
+    ops = requests.get(
+        "https://luasforecasts.rpa.ie/xml/get.ashx?action=forecast&stop="
+        + stop
+        + "&encrypt=false"
+    )
+
+    try:
+        doc = xml_to_dict(ops.text)
+    except ExpatError:
+        raise LuasStopNotFound
+
+    try:
+        for direction in doc["stopInfo"]["direction"]:
+            d = direction["@name"].lower()
+            timetable[d] = []
+            if isinstance(direction["tram"], list):
+                for tram in direction["tram"]:
+                    timetable[d].append(
+                        {
+                            "dueMins": tram.get("@dueMins", ""),
+                            "destination": tram.get("@destination", ""),
+                        }
+                    )
+            else:
+                tram = direction["tram"]
+                timetable[d].append(
+                    {
+                        "dueMins": tram.get("@dueMins", ""),
+                        "destination": tram.get("@destination", ""),
+                    }
+                )
+        return timetable
+    except KeyError:
+        raise LuasStopNotFound
+
+
 def get_stops(line_name):
     """Get the list of stops and their details
 

@@ -8,6 +8,7 @@ from luascli.luas import (
     print_stops,
     get_address,
     find_line_by_stop,
+    get_timetable,
 )
 from luascli import config
 from luascli.exceptions import (
@@ -101,6 +102,41 @@ def address(stop):
             "Address location not found at lat=" + alnf.lat + "lon=" + alnf.lon + ""
         )
         sys.exit(2)
+
+
+@luas.command()
+@click.argument("stop")
+@click.option(
+    "--format",
+    "-f",
+    default="text",
+    nargs=1,
+    show_default=True,
+    help="Output format (Valid options: json/text)",
+)
+def time(stop, format):
+    """Display the the inbound/outbout timetable of a particualr luas stop"""
+
+    try:
+        timetable = get_timetable(stop)
+        if format == "text":
+            for dest in timetable.keys():
+                click.echo(dest.capitalize())
+                for tram in timetable[dest]:
+                    click.echo(
+                        "\tDestination: "
+                        + tram["destination"]
+                        + " - Due: "
+                        + tram["dueMins"]
+                    )
+        elif format == "json":
+            pprint.pprint(timetable)
+        else:
+            click.echo("Format " + format + " is not valid.")
+            sys.exit(3)
+    except LuasStopNotFound:
+        click.echo("The Luas stop " + stop + " doesn't exist.")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

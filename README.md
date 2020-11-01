@@ -34,6 +34,7 @@ luas --help
 - status: show the operational status of the line
 - map: display the location of the luas stop on the map (default browser)
 - address: display the address of a particular luas stop
+- time: display the inbound/outbout timetable of a particualr luas stop
 
 Examples:
 
@@ -49,4 +50,7 @@ luas map cit
 
 # Display the address of a luas stop
 luas address cit
+
+# Display the inbound/outbound time table on Citiwest luas stop in json format
+luas time cit --format json
 ```

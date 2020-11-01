@@ -5,6 +5,7 @@ from luascli.luas import (
     print_stops,
     find_line_by_stop,
     get_address,
+    get_timetable,
 )
 import json
 from mock import patch
@@ -12,7 +13,6 @@ from requests.exceptions import Timeout
 import pytest
 from luascli.exceptions import (
     LuasLineNotFound,
-    AddressLocationNotFound,
     LuasStopNotFound,
 )
 
@@ -173,3 +173,44 @@ def test_find_line_by_stop():
 
     with pytest.raises(LuasLineNotFound):
         find_line_by_stop("somethingelse")
+
+
+@patch("luascli.luas.requests")
+def test_get_timetable(mock_requests):
+    """Test if get_timetable returns returns the timetable for the luas stop"""
+
+    mock_requests.get.return_value.text = """
+    <stopInfo created="2020-11-01T17:24:37" stop="Ranelagh" stopAbv="RAN">
+    <message>Green Line services operating normally</message>
+    <direction name="Inbound">
+        <tram dueMins="2" destination="Broombridge" />
+        <tram dueMins="14" destination="Broombridge" />
+    </direction>
+    <direction name="Outbound">
+        <tram dueMins="7" destination="Bride's Glen" />
+    </direction>
+    </stopInfo>
+    """
+
+    actual_result = get_timetable("ran")
+    expected_result = {
+        "inbound": [
+            {"destination": "Broombridge", "dueMins": "2"},
+            {"destination": "Broombridge", "dueMins": "14"},
+        ],
+        "outbound": [{"destination": "Bride's Glen", "dueMins": "7"}],
+    }
+
+    assert actual_result == expected_result
+
+    mock_requests.get.return_value.text = """
+    <somethingelse></somethingelse>
+    """
+    with pytest.raises(LuasStopNotFound):
+        actual_result = get_timetable("ran")
+
+    mock_requests.get.return_value.text = """
+    Not a valid xml
+    """
+    with pytest.raises(LuasStopNotFound):
+        actual_result = get_timetable("ran")
