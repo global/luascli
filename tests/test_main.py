@@ -66,6 +66,8 @@ def test_map(mock_click):
 
 
 def test_address():
+    """Test if running luas address <stop> returns the address of the Luas stop"""
+
     response = runner.invoke(luas, ["address", "cit"])
     assert response.exit_code == 0
     assert response.stdout.startswith("{'city") is True
@@ -79,3 +81,22 @@ def test_address():
     ):
         response = runner.invoke(luas, ["address", "cit"])
         assert response.exit_code == 2
+
+
+def test_timetable():
+    """Test if luas time <stop> would return the timetable"""
+
+    response = runner.invoke(luas, ["time", "cit", "--format", "json"])
+    assert response.exit_code == 0
+    assert response.stdout.startswith("{'inbound") is True
+
+    response = runner.invoke(luas, ["time", "cit", "--format", "text"])
+    assert response.exit_code == 0
+    assert response.stdout.startswith("Inbound") is True
+
+    response = runner.invoke(luas, ["time", "cit", "--format", "somethingelse"])
+    assert response.exit_code == 3
+
+    with mock.patch("luascli.main.get_timetable", side_effect=LuasStopNotFound):
+        response = runner.invoke(luas, ["time", "cit", "--format", "text"])
+        assert response.exit_code == 1
