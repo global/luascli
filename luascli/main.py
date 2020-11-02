@@ -9,6 +9,7 @@ from luascli.luas import (
     get_address,
     find_line_by_stop,
     get_timetable,
+    calculate_fare,
 )
 from luascli import config
 from luascli.exceptions import (
@@ -136,6 +137,39 @@ def time(stop, format):
             sys.exit(3)
     except LuasStopNotFound:
         click.echo("The Luas stop " + stop + " doesn't exist.")
+        sys.exit(1)
+
+
+@luas.command()
+@click.argument("begin_journey")
+@click.argument("end_journey")
+@click.option(
+    "--adults", "-a", nargs=1, default=0, show_default=True, help="Number of adults"
+)
+@click.option(
+    "--children", "-c", nargs=1, default=0, show_default=True, help="Number of children"
+)
+@click.option(
+    "--format",
+    "-f",
+    default="text",
+    nargs=1,
+    show_default=True,
+    help="Output format (Valid options: json/text)",
+)
+def fare(begin_journey, end_journey, adults, children, format):
+    try:
+        fare = calculate_fare(begin_journey, end_journey, adults, children)
+        if format == "text":
+            for dest in timetable.keys():
+                pprint.pprint(fare)
+        elif format == "json":
+            pprint.pprint(fare)
+        else:
+            click.echo("Format " + format + " is not valid.")
+            sys.exit(3)
+    except LuasStopNotFound as lsnf:
+        click.echo("The Luas stop " + lsnf.stop + " doesn't exist.")
         sys.exit(1)
 
 

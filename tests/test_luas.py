@@ -6,6 +6,7 @@ from luascli.luas import (
     find_line_by_stop,
     get_address,
     get_timetable,
+    calculate_fare,
 )
 import json
 from mock import patch
@@ -214,3 +215,42 @@ def test_get_timetable(mock_requests):
     """
     with pytest.raises(LuasStopNotFound):
         actual_result = get_timetable("ran")
+
+
+def test_calculate_fare():
+
+    # happy path
+    begin_journey = "cit"
+    end_journey = "jer"
+    num_adults = 2
+    num_children = 1
+    actual_result = calculate_fare(begin_journey, end_journey, num_adults, num_children)
+    expected_result = "7.50"
+    assert actual_result["fare_peak"] == expected_result
+
+    # invalid stop
+    begin_journey = "somethingelse"
+    end_journey = "jer"
+    num_adults = 2
+    num_children = 1
+
+    with pytest.raises(LuasStopNotFound):
+        calculate_fare(begin_journey, end_journey, num_adults, num_children)
+
+    # negative number of adults
+    begin_journey = "cit"
+    end_journey = "jer"
+    num_adults = -2
+    num_children = 1
+
+    with pytest.raises(ValueError):
+        calculate_fare(begin_journey, end_journey, num_adults, num_children)
+
+    # negative nuber of children
+    begin_journey = "cit"
+    end_journey = "jer"
+    num_adults = 1
+    num_children = -1
+
+    with pytest.raises(ValueError):
+        calculate_fare(begin_journey, end_journey, num_adults, num_children)

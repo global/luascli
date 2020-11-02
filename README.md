@@ -53,4 +53,7 @@ luas address cit
 
 # Display the inbound/outbound time table on Citiwest luas stop in json format
 luas time cit --format json
+
+# Calculate Luas Fare
+luas fare cit jer --adults 2 --children 1
 ```
