@@ -1,4 +1,4 @@
-name: build and test luascli
+name: build and test
 
 on:
   push:
@@ -27,6 +27,18 @@ jobs:
       - name: Run unit tests
         run: >-
           make test
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: ./coverage.xml
+          directory: ./
+          flags: unittests
+          env_vars: OS,PYTHON
+          name: codecov-luascli
+          fail_ci_if_error: true
+          verbose: true
 
       - name: Build luascli
         run: >-
