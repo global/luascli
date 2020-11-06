@@ -1,3 +1,7 @@
+![release](https://github.com/global/luascli/workflows/release/badge.svg)
+![release candidates](https://github.com/global/luascli/workflows/release%20candidates/badge.svg)
+![build and test luascli](https://github.com/global/luascli/workflows/build%20and%20test%20luascli/badge.svg)
+
 # Overview
 
 This is a CLI tool that helps you to get LUAS Irish Transport information. This tool is based on the [Luas Forecasting API](https://data.gov.ie/dataset/luas-forecasting-api/resource/078346e0-fe7f-4e71-9c51-21c78520dc3d) integrated with the [Open Street Map API](https://www.openstreetmap.org/)
