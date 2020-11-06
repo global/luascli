@@ -105,12 +105,21 @@ def test_timetable():
 def test_fare_calculator():
     """Test if we can calculate fare between 2 stops, including children and adults"""
 
+    # luas fare run successfully
     response = runner.invoke(
         luas,
         ["fare", "cit", "jer", "--adults", "2", "--children", "1", "--format", "json"],
     )
     assert response.exit_code == 0
     assert response.stdout.startswith("{'adults': 2") is True
+
+    # luas fare run successfully for text format
+    response = runner.invoke(
+        luas,
+        ["fare", "cit", "jer", "--adults", "2", "--children", "1", "--format", "text"],
+    )
+    assert response.exit_code == 0
+    assert response.stdout.startswith("From: Citywest Campus") is True
 
     # luas stop not found
     response = runner.invoke(

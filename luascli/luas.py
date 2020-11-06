@@ -229,7 +229,7 @@ def are_stops_on_same_line(first_stop, second_stop):
         line2 = find_line_by_stop(second_stop)
         if line1 == line2:
             return True
-    except LuasStopNotFound:
+    except (LuasStopNotFound, LuasLineNotFound):
         return False
 
     return False
