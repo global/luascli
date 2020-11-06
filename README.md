@@ -22,21 +22,25 @@ where
 pip install luascli
 ```
 
-## How to use
+## Usage
 
 ```
-luas <command> <arguments> [parameters]
-luas --help
+Usage: luas [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --version  Show the version and exit.
+  --help     Show this message and exit.
+
+Commands:
+  address  Display the address of the Luas stop
+  fare     Calculate the fare price for adults and child between stops
+  map      Launch Openstreet map URL with the stop location
+  status   Check if the Luas stop is operational
+  stops    List luas line stop names and its abbreviations (used in other commands)
+  time     Display the the inbound/outbout timetable of a particualr luas stop
 ```
-### Commands
 
-- stops: list all stops for a particular line
-- status: show the operational status of the line
-- map: display the location of the luas stop on the map (default browser)
-- address: display the address of a particular luas stop
-- time: display the inbound/outbout timetable of a particualr luas stop
-
-Examples:
+### Examples:
 
 ```
 # Show all red luas stops and their abbreviations (to be used with other commands)
@@ -53,4 +57,7 @@ luas address cit
 
 # Display the inbound/outbound time table on Citiwest luas stop in json format
 luas time cit --format json
+
+# Calculate Luas Fare
+luas fare cit jer --adults 2 --children 1
 ```

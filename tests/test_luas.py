@@ -6,6 +6,9 @@ from luascli.luas import (
     find_line_by_stop,
     get_address,
     get_timetable,
+    calculate_fare,
+    are_stops_on_same_line,
+    is_not_valid_stop,
 )
 import json
 from mock import patch
@@ -14,6 +17,7 @@ import pytest
 from luascli.exceptions import (
     LuasLineNotFound,
     LuasStopNotFound,
+    LuasStopsNotOnSameLine,
 )
 
 
@@ -214,3 +218,83 @@ def test_get_timetable(mock_requests):
     """
     with pytest.raises(LuasStopNotFound):
         actual_result = get_timetable("ran")
+
+
+def test_are_stops_on_same_line():
+    """Test if two luas stops belongs to the same line"""
+
+    # luas not in the same line
+    assert are_stops_on_same_line("cit", "ran") is False
+
+    # luas in the same line
+    assert are_stops_on_same_line("cit", "red") is True
+
+    # if luas stop doesn't exist it should return false
+    assert are_stops_on_same_line("somethingelse", "cit") is False
+
+
+def test_is_not_valid_stop():
+    """Test if a Luas stop is not valid"""
+
+    # stop is valid
+    assert is_not_valid_stop("ran") is False
+
+    # stop is not valid =
+    assert is_not_valid_stop("somethingelse") is True
+
+
+def test_calculate_fare():
+    """Test if fare calculation works with multiple parameters"""
+
+    # happy path
+    begin_journey = "cit"
+    end_journey = "jer"
+    num_adults = 2
+    num_children = 1
+    actual_result = calculate_fare(begin_journey, end_journey, num_adults, num_children)
+    expected_result = "7.50"
+    assert actual_result["fare_peak"] == expected_result
+
+    # invalid stop
+    begin_journey = "somethingelse"
+    end_journey = "jer"
+    num_adults = 2
+    num_children = 1
+
+    with pytest.raises(LuasStopNotFound):
+        calculate_fare(begin_journey, end_journey, num_adults, num_children)
+
+    begin_journey = "jer"
+    end_journey = "somethingelse"
+    num_adults = 2
+    num_children = 1
+
+    with pytest.raises(LuasStopNotFound):
+        calculate_fare(begin_journey, end_journey, num_adults, num_children)
+
+    # negative number of adults
+    begin_journey = "cit"
+    end_journey = "jer"
+    num_adults = -2
+    num_children = 1
+
+    with pytest.raises(ValueError):
+        calculate_fare(begin_journey, end_journey, num_adults, num_children)
+
+    # negative nuber of children
+    begin_journey = "cit"
+    end_journey = "jer"
+    num_adults = 1
+    num_children = -1
+
+    with pytest.raises(ValueError):
+        calculate_fare(begin_journey, end_journey, num_adults, num_children)
+
+    # stops not on the same line
+    begin_journey = "cit"
+    end_journey = "ran"
+    num_adults = 1
+    num_children = 1
+
+    with pytest.raises(LuasStopsNotOnSameLine):
+        calculate_fare(begin_journey, end_journey, num_adults, num_children)

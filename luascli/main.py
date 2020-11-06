@@ -9,6 +9,7 @@ from luascli.luas import (
     get_address,
     find_line_by_stop,
     get_timetable,
+    calculate_fare,
 )
 from luascli import config
 from luascli.exceptions import (
@@ -29,9 +30,7 @@ def luas():
 @luas.command()
 @click.argument("line")
 def stops(line):
-    """List luas line stop names and its abbreviations to be used
-    with others subcommands.
-    """
+    """List luas line stop names and its abbreviations (used in other commands)"""
 
     try:
         s = get_stops(line)
@@ -136,6 +135,52 @@ def time(stop, format):
             sys.exit(3)
     except LuasStopNotFound:
         click.echo("The Luas stop " + stop + " doesn't exist.")
+        sys.exit(1)
+
+
+@luas.command()
+@click.argument("begin_journey")
+@click.argument("end_journey")
+@click.option(
+    "--adults", "-a", nargs=1, default=0, show_default=True, help="Number of adults"
+)
+@click.option(
+    "--children", "-c", nargs=1, default=0, show_default=True, help="Number of children"
+)
+@click.option(
+    "--format",
+    "-f",
+    default="text",
+    nargs=1,
+    show_default=True,
+    help="Output format (Valid options: json/text)",
+)
+def fare(begin_journey, end_journey, adults, children, format):
+    """Calculate the fare price for adults and child between stops"""
+    try:
+        fare = calculate_fare(begin_journey, end_journey, adults, children)
+        line = find_line_by_stop(begin_journey)
+        s1 = get_stop_detail(begin_journey, line)
+        s2 = get_stop_detail(end_journey, line)
+        if format == "text":
+            for key, value in fare.items():
+                if key == "from":
+                    click.echo(
+                        key.replace("_", " ").capitalize() + ": " + str(s1["text"])
+                    )
+                elif key == "to":
+                    click.echo(
+                        key.replace("_", " ").capitalize() + ": " + str(s2["text"])
+                    )
+                else:
+                    click.echo(key.replace("_", " ").capitalize() + ": " + str(value))
+        elif format == "json":
+            pprint.pprint(fare)
+        else:
+            click.echo("Format " + format + " is not valid.")
+            sys.exit(3)
+    except LuasStopNotFound as lsnf:
+        click.echo("The Luas stop " + lsnf.stop + " doesn't exist.")
         sys.exit(1)
 
 

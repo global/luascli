@@ -3,7 +3,11 @@
 import click
 import requests
 from luascli.util import xml_to_dict, get_address_by_coordinates
-from luascli.exceptions import LuasStopNotFound, LuasLineNotFound
+from luascli.exceptions import (
+    LuasStopNotFound,
+    LuasLineNotFound,
+    LuasStopsNotOnSameLine,
+)
 from xml.parsers.expat import ExpatError
 from luascli import config
 
@@ -157,7 +161,7 @@ def print_stops(stops):
 def get_address(stop):
     """Get the address of a LUAS stop, according to its lat/lon information
     Args:
-        stop: stop: LUAS stop abbreviated name
+        stop: LUAS stop abbreviated name
 
     Returns:
         The address of a Luas stop, in dict format
@@ -190,3 +194,97 @@ def find_line_by_stop(stop):
                 return line
 
     raise LuasLineNotFound
+
+
+def is_not_valid_stop(stop):
+    """Validate if stop name exists in the luas line
+
+    Args:
+        stop: LUAS stop abbreviated name
+
+    Returns:
+        True if stop is not valid and False otherwise
+    """
+
+    try:
+        find_line_by_stop(stop)
+        return False
+    except LuasLineNotFound:
+        return True
+
+
+def are_stops_on_same_line(first_stop, second_stop):
+    """Validate if stop name exists in the luas line
+
+    Args:
+        first_stop: LUAS stop abbreviated name
+        second_stop: LUAS stop abbreviated name
+
+    Returns:
+        True if both stops belongs to the same line, False otherwise
+    """
+
+    try:
+        line1 = find_line_by_stop(first_stop)
+        line2 = find_line_by_stop(second_stop)
+        if line1 == line2:
+            return True
+    except (LuasStopNotFound, LuasLineNotFound):
+        return False
+
+    return False
+
+
+def calculate_fare(begin_journey, end_journey, num_adults=0, num_children=0):
+    """Calculates the fare between two stops
+
+    Args:
+        stop: stop: LUAS stop abbreviated name
+
+    Returns:
+        True if stops exists or False otherwise
+    """
+
+    if (
+        num_adults < 0
+        or not isinstance(num_adults, int)
+        or num_children < 0
+        or not isinstance(num_children, int)
+    ):
+        raise ValueError
+
+    if is_not_valid_stop(begin_journey):
+        raise LuasStopNotFound(begin_journey)
+    elif is_not_valid_stop(end_journey):
+        raise LuasStopNotFound(end_journey)
+
+    if are_stops_on_same_line(begin_journey, end_journey):
+
+        response = requests.get(
+            "https://luasforecasts.rpa.ie/xml/get.ashx?action=farecalc&from="
+            + begin_journey
+            + "&to="
+            + end_journey
+            + "&adults="
+            + str(num_adults)
+            + "&children="
+            + str(num_children)
+            + "&encrypt=false"
+        )
+
+        output = {}
+        fare_dict = xml_to_dict(response.text)
+        output["from"] = begin_journey
+        output["to"] = end_journey
+        output["adults"] = num_adults
+        output["children"] = num_children
+        output["fare_peak"] = fare_dict["farecalc"]["result"].get("@peak", "")
+        output["fare_offpeak"] = fare_dict["farecalc"]["result"].get("@offpeak", "")
+        output["zones_travelled"] = fare_dict["farecalc"]["result"].get(
+            "@zonesTravelled", ""
+        )
+
+        return output
+
+    else:
+        raise LuasStopsNotOnSameLine(begin_journey, end_journey)
