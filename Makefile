@@ -12,6 +12,7 @@ check:
 test:
 	PIPENV_VERBOSITY=-1 pipenv run coverage run --source=luascli --omit=luascli/__version__.py -m pytest tests
 	PIPENV_VERBOSITY=-1 pipenv run coverage report --fail-under=100 -m
+	PIPENV_VERBOSITY=-1 pipenv run coverage xml
 
 build: init check clean test
 	PIPENV_VERBOSITY=-1 pipenv run python setup.py sdist bdist_wheel
@@ -30,7 +31,7 @@ local-install: build
 	python install --editable .
 
 clean:
-	rm -rf build dist .egg luascli.egg-info .coverage
+	rm -rf build dist .egg luascli.egg-info .coverage coverage.xml
 
 help:
 	@echo "This project assumes that you have python and pip installed."

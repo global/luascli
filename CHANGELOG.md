@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 # Added
 
 - Build / test / release badges in the README.md file
+- Added codecov.io integration in the ci/cd pipelines
 
 # [0.7.0] - 2020-11-06
 

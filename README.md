@@ -1,6 +1,7 @@
 ![release](https://github.com/global/luascli/workflows/release/badge.svg)
 ![release candidates](https://github.com/global/luascli/workflows/release%20candidates/badge.svg)
 ![build and test luascli](https://github.com/global/luascli/workflows/build%20and%20test%20luascli/badge.svg)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 # Overview
 
