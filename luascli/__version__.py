@@ -11,7 +11,7 @@ __title__ = "luascli"
 __description__ = "This is a CLI tool that helps you to get LUAS \
     Irish Transport information"
 __url__ = "http://github.com/global/luascli"
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 __author__ = "Anderson Goulart"
 __author_email__ = "global@kokre.io"
 __license__ = "MIT"
