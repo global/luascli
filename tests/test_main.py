@@ -26,9 +26,11 @@ def test_stops():
 
 def test_status():
     """Test if running luas <line> status returns successfull with a valid result"""
-    response = runner.invoke(luas, ["status", "red"])
-    assert response.exit_code == 0
-    assert response.output == "Red Line services operating normally\n"
+    with mock.patch("luascli.main.get_status") as mock_get_status:
+        mock_get_status.return_value = "Red Line services operating normally"
+        response = runner.invoke(luas, ["status", "red"])
+        assert response.exit_code == 0
+        assert response.output == "Red Line services operating normally\n"
 
     response = runner.invoke(luas, ["status", "ran"])
     assert response.exit_code == 0
