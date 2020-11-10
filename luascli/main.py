@@ -86,13 +86,25 @@ def map(stop):
 
 
 @luas.command()
+@click.option(
+    "--format",
+    "-f",
+    default="text",
+    nargs=1,
+    show_default=True,
+    help="Output format (Valid options: json/text)",
+)
 @click.argument("stop")
-def address(stop):
+def address(stop, format):
     """Display the address of the Luas stop"""
 
     try:
         address = get_address(stop)
-        pprint.pprint(address)
+        if format == "text":
+            for key, value in address.items():
+                click.echo(key.replace("_", " ").capitalize() + ": " + str(value))
+        else:
+            pprint.pprint(address)
     except (LuasStopNotFound, LuasLineNotFound):
         click.echo("The Luas stop " + stop + " doesn't exist.")
         sys.exit(1)

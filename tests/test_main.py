@@ -70,7 +70,11 @@ def test_address():
 
     response = runner.invoke(luas, ["address", "cit"])
     assert response.exit_code == 0
-    assert response.stdout.startswith("{'city") is True
+    assert response.stdout.startswith("Full address: ") is True
+
+    response = runner.invoke(luas, ["address", "cit", "--format", "text"])
+    assert response.exit_code == 0
+    assert response.stdout.startswith("Full address: ") is True
 
     with mock.patch("luascli.main.get_address", side_effect=LuasStopNotFound):
         response = runner.invoke(luas, ["address", "cit"])
@@ -81,6 +85,10 @@ def test_address():
     ):
         response = runner.invoke(luas, ["address", "cit"])
         assert response.exit_code == 2
+
+    response = runner.invoke(luas, ["address", "cit", "--format", "json"])
+    assert response.exit_code == 0
+    assert response.stdout.startswith("{'city") is True
 
 
 def test_timetable():
