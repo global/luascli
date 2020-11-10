@@ -10,6 +10,11 @@ This is a CLI tool that helps you to get LUAS Irish Transport information. This 
 
 `luascli` is licensed under the MIT license.
 
+
+## Demo
+
+![demo](static/demo.gif)
+
 ## Basic information
 
 This CLI uses the following format:
