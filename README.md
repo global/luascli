@@ -15,6 +15,10 @@ This is a CLI tool that helps you to get LUAS Irish Transport information. This 
 
 This project contains Irish Public Sector Data licensed under a Creative Commons Attribution 4.0 International (CC BY 4.0) licence. You can find more information about the license at [Open License](https://data.gov.ie/pages/opendatalicence).
 
+## Demo
+
+![demo](static/demo.gif)
+
 
 ## Basic information
 
