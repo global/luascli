@@ -175,13 +175,10 @@ def find_line_by_stop(stop):
 
     Args:
         stop: stop: LUAS stop abbreviated name
-        line_name: LUAS line (red/green)
 
     Returns:
         The address of a Luas stop, in dict format
     """
-
-    stops = get_stops
 
     for line in config.luas.keys():
         stops = get_stops(line)
