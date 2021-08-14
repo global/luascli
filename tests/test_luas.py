@@ -166,7 +166,7 @@ def test_get_address():
     """Test if get_address returns positive results"""
 
     address = get_address("ran")
-    assert address["postcode"] == "D06 R9X5"
+    assert address["postcode"] == "D06 Y027"
 
 
 def test_find_line_by_stop():
