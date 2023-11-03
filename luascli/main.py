@@ -126,7 +126,7 @@ def address(stop, format):
     help="Output format (Valid options: json/text)",
 )
 def time(stop, format):
-    """Display the the inbound/outbout timetable of a particualr luas stop"""
+    """Display the inbound/outbound timetable of a particular luas stop"""
 
     try:
         timetable = get_timetable(stop)
