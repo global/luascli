@@ -53,7 +53,7 @@ Commands:
   map      Launch Openstreet map URL with the stop location
   status   Check if the Luas stop is operational
   stops    List luas line stop names and its abbreviations (used in other commands)
-  time     Display the the inbound/outbout timetable of a particualr luas stop
+  time     Display the inbound/outbound timetable of a particular luas stop
 ```
 
 ### Examples:
